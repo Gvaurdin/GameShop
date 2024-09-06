@@ -1,4 +1,5 @@
 ﻿using GameShopModel.Data;
+using GameShopModel.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,12 @@ namespace GameShop.Controllers
     {
         public async Task<IActionResult> Details(int id)
         {
-         var t = await gameShopContext.GameProducts
-                .Include(gameProduct => gameProduct.Genres)
-                .Include(gameProduct => gameProduct.ImagesUrl)
-                .FirstAsync(gameProduct => gameProduct.Id == id);
-            return View();
+            var gameProduct = await gameShopContext.GameProducts
+                   .Include(gameProduct => gameProduct.Genres)
+                   .Include(gameProduct => gameProduct.ImagesUrl)
+                   .FirstAsync(gameProduct => gameProduct.Id == id);
+            return View(gameProduct);
+
         }
     }
 }

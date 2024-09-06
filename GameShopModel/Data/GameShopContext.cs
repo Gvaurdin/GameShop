@@ -16,10 +16,15 @@ namespace GameShopModel.Data
             modelBuilder.Entity<GameProduct>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
-            base.OnModelCreating(modelBuilder);
         }
         public DbSet<Genre> Genres {  get; set; }
         public DbSet<ImageUrl> Images { get; set; }
+
+        public DbSet<MinimumSystemRequirement> MinimumSystemRequirements {  get; set; }
+
+        public DbSet<RecommendedSystemRequirement> RecommendedSystemRequirements { get; set; }
+
+
 
     }
 }

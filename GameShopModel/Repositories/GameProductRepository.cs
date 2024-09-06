@@ -44,9 +44,12 @@ namespace GameShopModel.Repositories
                 .SetProperty(
                     editingGameProduct => editingGameProduct.ReleaseDate, gameProduct => gameProduct.ReleaseDate)
                 .SetProperty(
-                    editingGameProduct => editingGameProduct.Genres, gameProduct => gameProduct.Genres)
+                    editingGameProduct => editingGameProduct.ImagesUrl, gameProduct => gameProduct.ImagesUrl)
                 .SetProperty(
-                    editingGameProduct => editingGameProduct.ImagesUrl, gameProduct => gameProduct.ImagesUrl));
+                editingGameProduct => editingGameProduct.MinimumSystemRequirement, gameProduct => gameProduct.MinimumSystemRequirement)
+                .SetProperty(
+                editingGameProduct => editingGameProduct.RecommendedSystemRequirement, gameProduct => gameProduct.RecommendedSystemRequirement)
+            );
 
         public async Task RemoveGameProductAsync(int id)
         {

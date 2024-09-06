@@ -1,48 +1,47 @@
 ﻿@using GameShopModel.Entities
 @model List<GameProduct>
 
-<div class="container">
-    <div class="row">
-        <div class="col-sm-6 col-lg-4">
-            @foreach (var gameProduct in Model)
-            {
-                <div class="card" style="width: 18rem;">
-                    <img src="@gameProduct.PresentationImageURL" class="card-img-top" alt="@gameProduct.Title" />
-                    <div class="card-body">
-                        <h5 class="card-title">@gameProduct.Title</h5>
-                        <p class="card-text">@gameProduct.Description</p>
-                        <a href="#" class="btn btn-primary">Купить</a>
-                    </div>
-                </div>
-
-            }
-            <div class="card">
-                <img src="https://assets.codepen.io/6093409/mountains-1.jpg" alt="a snow-capped mountain range" />
+<div class="container-fluid">
+    <div class="row justify-content-start">
+        @foreach (var gameProduct in Model)
+        {
+            <div class="card" style="width: 18rem;">
+                <img src="@gameProduct.PresentationImageURL" class="card-img-top" alt="@gameProduct.Title" />
                 <div class="card-body">
-                    <h2 class="card-title">Mountains</h2>
-                    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
-                    <a href="#" class="btn btn-secondary">Learn more</a>
+                    <h5 class="card-title">@gameProduct.Title</h5>
+                    <a href="#" class="btn btn-primary">Купить</a>
                 </div>
             </div>
-            <div class="card">
-                <img src="https://assets.codepen.io/6093409/mountains-4.jpg" alt="a snowy mountain with clouds behind it" />
-                <div class="card-body">
-                    <h2 class="card-title">Mountains</h2>
-                    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
-                    <a href="#" class="btn btn-secondary">Learn more</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="https://assets.codepen.io/6093409/mountains-3.jpg" alt="a mountain range under a thin layer of clouds" />
-                <div class="card-body">
-                    <h2 class="card-title">Mountains</h2>
-                    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
-                    <a href="#" class="btn btn-secondary">Learn more</a>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </div>
+@*             <div class="card">
+    <img src="https://assets.codepen.io/6093409/mountains-1.jpg" alt="a snow-capped mountain range" />
+    <div class="card-body">
+    <h2 class="card-title">Mountains</h2>
+    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
+    <a href="#" class="btn btn-secondary">Learn more</a>
+    </div>
+    </div>
+    <div class="card">
+    <img src="https://assets.codepen.io/6093409/mountains-4.jpg" alt="a snowy mountain with clouds behind it" />
+    <div class="card-body">
+    <h2 class="card-title">Mountains</h2>
+    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
+    <a href="#" class="btn btn-secondary">Learn more</a>
+    </div>
+    </div>
+    <div class="card">
+    <img src="https://assets.codepen.io/6093409/mountains-3.jpg" alt="a mountain range under a thin layer of clouds" />
+    <div class="card-body">
+    <h2 class="card-title">Mountains</h2>
+    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
+    <a href="#" class="btn btn-secondary">Learn more</a>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div> *@
 
 
 

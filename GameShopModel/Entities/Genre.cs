@@ -10,7 +10,6 @@ namespace GameShopModel.Entities
     {
         public int Id { get; set; }
         public required string Title { get; set; }
-
-        public required List<GameProduct>? GameProducts { get; set; }
+        public required List<GameProduct> GameProducts { get; set; }
     }
 }
