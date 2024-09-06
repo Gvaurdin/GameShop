@@ -28,19 +28,25 @@ namespace GameShopModel.Repositories
             await gameShopContext.SaveChangesAsync();
         }
 
-        public async Task EditGameProductAsync(int id,GameProduct gameProduct)
-        {
-            var editingGameProduct = await gameShopContext.GameProducts.FirstAsync(gameProduct => gameProduct.Id == id);
-            editingGameProduct.Title = gameProduct.Title;
-            editingGameProduct.Description = gameProduct.Description;
-            editingGameProduct.PresentationImageURL = gameProduct.PresentationImageURL;
-            editingGameProduct.Price = gameProduct.Price;
-            editingGameProduct.ReleaseDate = gameProduct.ReleaseDate;
-            editingGameProduct.Genre = gameProduct.Genre;
-            editingGameProduct.ImagesUrl = gameProduct.ImagesUrl;
+        public async Task EditGameProductAsync(int id, GameProduct gameProduct) =>
+        await gameShopContext.GameProducts
+            .Where(editingGameProduct => editingGameProduct.Id == id)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.PresentationImageURL, gameProduct => gameProduct.PresentationImageURL)
 
-            await gameShopContext.SaveChangesAsync();
-        }
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.Title, gameProduct => gameProduct.Title)
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.Description, gameProduct => gameProduct.Description)
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.Price, gameProduct => gameProduct.Price)
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.ReleaseDate, gameProduct => gameProduct.ReleaseDate)
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.Genres, gameProduct => gameProduct.Genres)
+                .SetProperty(
+                    editingGameProduct => editingGameProduct.ImagesUrl, gameProduct => gameProduct.ImagesUrl));
 
         public async Task RemoveGameProductAsync(int id)
         {

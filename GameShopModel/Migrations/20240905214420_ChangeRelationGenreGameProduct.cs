@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GameShopModel.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class ChangeRelationGenreGameProduct : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "GameProducts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PresentationImageURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GameProducts", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Genres",
                 columns: table => new
@@ -22,30 +39,6 @@ namespace GameShopModel.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Genres", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GameProducts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PresentationImageURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    GenreId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GameProducts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GameProducts_Genres_GenreId",
-                        column: x => x.GenreId,
-                        principalTable: "Genres",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,10 +60,34 @@ namespace GameShopModel.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "GameProductGenre",
+                columns: table => new
+                {
+                    GameProductsId = table.Column<int>(type: "int", nullable: false),
+                    GenresId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GameProductGenre", x => new { x.GameProductsId, x.GenresId });
+                    table.ForeignKey(
+                        name: "FK_GameProductGenre_GameProducts_GameProductsId",
+                        column: x => x.GameProductsId,
+                        principalTable: "GameProducts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GameProductGenre_Genres_GenresId",
+                        column: x => x.GenresId,
+                        principalTable: "Genres",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_GameProducts_GenreId",
-                table: "GameProducts",
-                column: "GenreId");
+                name: "IX_GameProductGenre_GenresId",
+                table: "GameProductGenre",
+                column: "GenresId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Images_GameProductId",
@@ -82,13 +99,16 @@ namespace GameShopModel.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "GameProductGenre");
+
+            migrationBuilder.DropTable(
                 name: "Images");
 
             migrationBuilder.DropTable(
-                name: "GameProducts");
+                name: "Genres");
 
             migrationBuilder.DropTable(
-                name: "Genres");
+                name: "GameProducts");
         }
     }
 }

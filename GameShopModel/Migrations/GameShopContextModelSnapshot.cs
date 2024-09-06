@@ -22,6 +22,21 @@ namespace GameShopModel.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("GameProductGenre", b =>
+                {
+                    b.Property<int>("GameProductsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GenresId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GameProductsId", "GenresId");
+
+                    b.HasIndex("GenresId");
+
+                    b.ToTable("GameProductGenre");
+                });
+
             modelBuilder.Entity("GameShopModel.Entities.GameProduct", b =>
                 {
                     b.Property<int>("Id")
@@ -33,9 +48,6 @@ namespace GameShopModel.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
 
                     b.Property<string>("PresentationImageURL")
                         .IsRequired()
@@ -52,8 +64,6 @@ namespace GameShopModel.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GenreId");
 
                     b.ToTable("GameProducts");
                 });
@@ -97,15 +107,19 @@ namespace GameShopModel.Migrations
                     b.ToTable("Images");
                 });
 
-            modelBuilder.Entity("GameShopModel.Entities.GameProduct", b =>
+            modelBuilder.Entity("GameProductGenre", b =>
                 {
-                    b.HasOne("GameShopModel.Entities.Genre", "Genre")
+                    b.HasOne("GameShopModel.Entities.GameProduct", null)
                         .WithMany()
-                        .HasForeignKey("GenreId")
+                        .HasForeignKey("GameProductsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Genre");
+                    b.HasOne("GameShopModel.Entities.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GameShopModel.Entities.ImageUrl", b =>

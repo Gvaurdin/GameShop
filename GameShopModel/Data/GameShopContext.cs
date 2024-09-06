@@ -10,7 +10,7 @@ namespace GameShopModel.Data
 {
     public class GameShopContext(DbContextOptions<GameShopContext> options) : DbContext(options)
     {
-        public DbSet<GameProduct> GameProducts {  get; set; }
+        public DbSet<GameProduct> GameProducts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<GameProduct>()
@@ -20,7 +20,6 @@ namespace GameShopModel.Data
         }
         public DbSet<Genre> Genres {  get; set; }
         public DbSet<ImageUrl> Images { get; set; }
-
 
     }
 }
