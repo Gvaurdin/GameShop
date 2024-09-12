@@ -44,7 +44,7 @@ namespace GameShopModel.Repositories
                 .SetProperty(
                     editingGameProduct => editingGameProduct.ReleaseDate, gameProduct => gameProduct.ReleaseDate)
                 .SetProperty(
-                    editingGameProduct => editingGameProduct.ImagesUrl, gameProduct => gameProduct.ImagesUrl)
+                    editingGameProduct => editingGameProduct.Images, gameProduct => gameProduct.Images)
                 .SetProperty(
                 editingGameProduct => editingGameProduct.MinimumSystemRequirement, gameProduct => gameProduct.MinimumSystemRequirement)
                 .SetProperty(

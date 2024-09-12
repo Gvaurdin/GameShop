@@ -10,25 +10,25 @@ using System.Threading.Tasks;
 
 namespace GameShopModel.Repositories
 {
-    public class ImageUrlRepository(GameShopContext gameShopContext) : IImagesUrlRepository
+    public class ImageRepository(GameShopContext gameShopContext) : IImageRepository
     {
-        public async Task<List<ImageUrl>> GetAllImageUrlsAsync()
+        public async Task<List<Image>> GetAllImageUrlsAsync()
         {
             return await gameShopContext.Images.ToListAsync();
         }
 
-        public async Task<ImageUrl> GetImageUrlAsync(int id)
+        public async Task<Image> GetImageUrlAsync(int id)
         {
             return await gameShopContext.Images.FirstAsync(image => image.Id == id);
         }
 
-        public async Task AddImageUrlAsync(ImageUrl imageUrl)
+        public async Task AddImageUrlAsync(Image imageUrl)
         {
             await gameShopContext.Images.AddAsync(imageUrl);
             await gameShopContext.SaveChangesAsync();
         }
 
-        public async Task EditImageUrlAsync(int id, ImageUrl imageUrl)
+        public async Task EditImageUrlAsync(int id, Image imageUrl)
         {
             var editingImageUrl = await gameShopContext.Images.FirstAsync(image => image.Id == id);
             editingImageUrl.URL = imageUrl.URL;

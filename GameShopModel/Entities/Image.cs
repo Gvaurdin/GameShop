@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameShopModel.Entities
 {
-    public class ImageUrl
+    public class Image
     {
         public int Id { get; set; }
         public required string URL { get; set; }

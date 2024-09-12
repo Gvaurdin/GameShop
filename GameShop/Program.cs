@@ -21,12 +21,15 @@ using GameShopModel.Data;
 using GameShopModel.Repositories.Interfaces;
 using GameShopModel.Repositories;
 using Microsoft.EntityFrameworkCore;
+using GameShop.Repository;
+using GameShop.Repository.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IGameProductRepository, GameProductRepository>();
+builder.Services.AddSingleton<IRepositoryCart,RepositoryCart>();
 builder.Services.AddDbContext<GameShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GameShopContext") ??
     throw new InvalidOperationException("Connection string 'GameShopContext' not found.")));

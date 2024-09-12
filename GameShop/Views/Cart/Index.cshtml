@@ -1,0 +1,24 @@
+﻿@using GameShopModel.Entities;
+@{
+    ViewData["Title"] = "Корзина";
+}
+@model IEnumerable<GameProduct>
+
+<div class="container-fluid">
+    <div class="row justify-content-start">
+        @foreach (var gameProduct in Model)
+        {
+
+            <div class="card" style="width: 18rem;">
+                <img src="@gameProduct.PresentationImageURL" class="card-img-top img-fluid" alt="@gameProduct.Title">
+                <div class="text-section">
+                    <h5 class="card-title fw-bold">@gameProduct.Title</h5>
+                </div>
+                <div class="cta-section">
+                    <div>@gameProduct.Price</div>
+                    <a asp-controller="Cart" asp-action="Delete" asp-route-id="@gameProduct.Id" type="button" class="btn btn-danger">Удалить</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

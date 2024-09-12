@@ -18,11 +18,13 @@ namespace GameShopModel.Data
                 .HasColumnType("decimal(18,2)");
         }
         public DbSet<Genre> Genres {  get; set; }
-        public DbSet<ImageUrl> Images { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         public DbSet<MinimumSystemRequirement> MinimumSystemRequirements {  get; set; }
 
         public DbSet<RecommendedSystemRequirement> RecommendedSystemRequirements { get; set; }
+
+        public DbSet<Video> Videos { get; set; }
 
 
 

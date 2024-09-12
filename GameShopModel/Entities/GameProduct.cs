@@ -14,7 +14,8 @@ namespace GameShopModel.Entities
         public required string Description { get; set; }
         public required decimal Price { get; set; }
         public required DateTime ReleaseDate { get; set; }
-        public List<ImageUrl>? ImagesUrl { get; set; }
+        public required List<Image> Images { get; set; }
+        public required List<Video> Videos { get; set; }
         public required List<Genre> Genres { get; set; }
         public int? MinimumSystemRequirementId { get; set; }
         public MinimumSystemRequirement? MinimumSystemRequirement { get; set; }

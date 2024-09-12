@@ -4,6 +4,7 @@ using GameShopModel.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameShopModel.Migrations
 {
     [DbContext(typeof(GameShopContext))]
-    partial class GameShopContextModelSnapshot : ModelSnapshot
+    [Migration("20240909134616_AddVideo")]
+    partial class AddVideo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,16 +220,11 @@ namespace GameShopModel.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("GameProductId")
-                        .HasColumnType("int");
-
                     b.Property<string>("URL")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GameProductId");
 
                     b.ToTable("Videos");
                 });
@@ -268,18 +266,9 @@ namespace GameShopModel.Migrations
                         .HasForeignKey("GameProductId");
                 });
 
-            modelBuilder.Entity("GameShopModel.Entities.Video", b =>
-                {
-                    b.HasOne("GameShopModel.Entities.GameProduct", null)
-                        .WithMany("Videos")
-                        .HasForeignKey("GameProductId");
-                });
-
             modelBuilder.Entity("GameShopModel.Entities.GameProduct", b =>
                 {
                     b.Navigation("Images");
-
-                    b.Navigation("Videos");
                 });
 #pragma warning restore 612, 618
         }
