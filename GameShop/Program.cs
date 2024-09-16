@@ -23,6 +23,10 @@ using GameShopModel.Repositories;
 using Microsoft.EntityFrameworkCore;
 using GameShop.Repository;
 using GameShop.Repository.Interfaces;
+using GameShopModel.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using GameShop.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +37,13 @@ builder.Services.AddSingleton<IRepositoryCart,RepositoryCart>();
 builder.Services.AddDbContext<GameShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GameShopContext") ??
     throw new InvalidOperationException("Connection string 'GameShopContext' not found.")));
+builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<GameShopContext>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSession();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 var app = builder.Build();
+await Seed.SeedUserAndRolesAsync(app);
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

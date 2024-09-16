@@ -1,4 +1,5 @@
 ﻿using GameShopModel.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,13 +9,23 @@ using System.Threading.Tasks;
 
 namespace GameShopModel.Data
 {
-    public class GameShopContext(DbContextOptions<GameShopContext> options) : DbContext(options)
+    public class GameShopContext(DbContextOptions<GameShopContext> options) : IdentityDbContext(options)
     {
+        // new - перекрытия свойства identity
+        public new DbSet<User>? Users { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+
+        public DbSet<WishList> WishLists { get; set; }
         public DbSet<GameProduct> GameProducts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<GameProduct>()
                 .Property(p => p.Price)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Cart>()
+                .Property(sum => sum.Sum)
                 .HasColumnType("decimal(18,2)");
         }
         public DbSet<Genre> Genres {  get; set; }

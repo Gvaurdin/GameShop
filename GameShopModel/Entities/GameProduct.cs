@@ -21,5 +21,7 @@ namespace GameShopModel.Entities
         public MinimumSystemRequirement? MinimumSystemRequirement { get; set; }
         public int? RecommendedSystemRequirementId { get; set; }
         public RecommendedSystemRequirement? RecommendedSystemRequirement { get; set; }
+
+        public required List<Cart> Carts { get; set; }
     }
 }

@@ -1,10 +1,12 @@
-﻿using GameShopModel.Repositories;
+﻿using GameShopModel.Data;
+using GameShopModel.Repositories;
 using GameShopModel.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameShop.Controllers
 {
-    public class HomeController(IGameProductRepository gameProductRepository) : Controller
+    public class HomeController(GameShopContext gameShopContext,IGameProductRepository gameProductRepository) : Controller
     {
         public async Task<IActionResult> Index()
         {
@@ -22,9 +24,13 @@ namespace GameShop.Controllers
             return View();
         }
 
-        public IActionResult WishList()
+        public async Task<IActionResult> WishList()
         {
-            return View();
+           var wishList = await gameShopContext.WishLists
+                .Include(wishList => wishList.User)
+                .Include(wishList => wishList.GameProduct)
+                .Where(wishList => wishList.User.Id == "8b8f505f-91ff-4ac0-abf3-b980e62d4b4d").ToListAsync();
+            return View(wishList);
         }
     }
 }

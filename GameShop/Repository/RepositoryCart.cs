@@ -6,6 +6,8 @@ namespace GameShop.Repository
     public class RepositoryCart:IRepositoryCart
     {
         private readonly List<GameProduct> gameProducts = [];
+
+        public decimal GetSum => gameProducts.Sum(gameProduct => gameProduct.Price);
         public void Add(GameProduct gameProduct)
         {
             gameProducts.Add(gameProduct);
@@ -19,5 +21,8 @@ namespace GameShop.Repository
 
         public IEnumerable<GameProduct> GetProducts() => 
             gameProducts;
+
+        public void Clear() =>
+            gameProducts.Clear();
     }
 }
