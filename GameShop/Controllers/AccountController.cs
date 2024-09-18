@@ -52,5 +52,54 @@ namespace GameShop.Controllers
             TempData["Error"] = "Wrong credentials. Please try again";
             return View(loginViewModel);
         }
+
+        public IActionResult Register()
+        {
+            var response = new RegisterViewModel();
+            return View(response);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
+        {
+            if (!ModelState.IsValid) return View(registerViewModel);
+
+            var user = await _userManager.FindByEmailAsync(registerViewModel.EmailAddress);
+            if (user != null)
+            {
+                TempData["Error"] = "Этот адрес электронной почты уже занят";
+                return View(registerViewModel);
+            }
+            if(registerViewModel.ConfirmPassword != registerViewModel.Password)
+            {
+                TempData["Error"] = "Введенные пароли не совпадают!";
+                return View(registerViewModel);
+            }
+            var newUser = new User
+            {
+                UserName = registerViewModel.EmailAddress,
+                Email = registerViewModel.EmailAddress
+                
+            };
+
+            var createUserResult = await _userManager.CreateAsync(newUser,registerViewModel.Password);
+
+            if (createUserResult.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(newUser, UserRoles.User);
+                await _signInManager.SignInAsync(newUser, isPersistent: false);
+                return RedirectToAction("Index", "Home");
+            }
+            foreach (var error in createUserResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(registerViewModel);
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
     }
 }

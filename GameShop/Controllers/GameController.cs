@@ -1,5 +1,6 @@
 ﻿using GameShop.Repository;
 using GameShop.Repository.Interfaces;
+using GameShop.ViewModel;
 using GameShopModel.Data;
 using GameShopModel.Entities;
 using GameShopModel.Repositories.Interfaces;
@@ -7,10 +8,11 @@ using GameShopModel.ViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GameShop.Controllers
 {
-    public class GameController(UserManager<User> userManager,GameShopContext gameShopContext, IGameProductRepository gameProductRepository, IRepositoryCart repositoryCart) : Controller
+    public class GameController(IHttpContextAccessor httpContextAccessor,GameShopContext gameShopContext, IGameProductRepository gameProductRepository, IRepositoryCart repositoryCart) : Controller
     {
         public async Task<IActionResult> Details(int id)
         {
@@ -21,7 +23,43 @@ namespace GameShop.Controllers
                    .Include(gameProduct => gameProduct.MinimumSystemRequirement)
                    .Include(gameProduct => gameProduct.RecommendedSystemRequirement)
                    .FirstAsync(gameProduct => gameProduct.Id == id);
-            return View(gameProduct);
+
+            var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            // проверяем, находиться ли игра в списке желаемых
+            var isInWishList = await gameShopContext.WishLists
+                .AnyAsync(wl => wl.GameProduct.Id == id && wl.User.Id == idUser);
+
+            // проверяем, находится ли игра в корзине
+            var isInCart = repositoryCart.GetProducts().Any(p => p.Id == id);
+
+            // проверяем, куплена ли игра и находится ли она в библиотеке
+            var isInLibrary = await gameShopContext.Carts
+                .Include(c => c.GameProducts)
+                .AnyAsync(c => c.User.Id == idUser && c.GameProducts.Any(p => p.Id == id));
+
+            if (isInLibrary && isInWishList)
+            {
+                var wishListEntry = await gameShopContext.WishLists
+                    .FirstOrDefaultAsync(wl => wl.GameProduct.Id == id && wl.User.Id == idUser);
+
+                if (wishListEntry != null)
+                {
+                    gameShopContext.WishLists.Remove(wishListEntry);
+                    await gameShopContext.SaveChangesAsync();
+                }
+
+                // Обновляем статус, что игра больше не в списке желаемого
+                isInWishList = false;
+            }
+            var vmDetails = new GameDetailsViewModel
+            {
+                GameProduct = gameProduct,
+                IsInWishlist = isInWishList,
+                IsInCart = isInCart,
+                IsInLibrary = isInLibrary
+            };
+
+            return View(vmDetails);
 
         }
 
@@ -35,8 +73,9 @@ namespace GameShop.Controllers
 
         public async Task<IActionResult> AddWishList(int id)
         {
+            var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var user = await gameShopContext.Users.FirstAsync(user => user.Id == idUser);
             var gameProduct = await gameProductRepository.GetGameProductAsync(id);
-            var user = await userManager.FindByEmailAsync("admin@yandex.ru");
             var wishList = new WishList
             {
                 GameProduct = gameProduct,
@@ -46,7 +85,8 @@ namespace GameShop.Controllers
             await gameShopContext.WishLists.AddAsync(wishList);
             await gameShopContext.SaveChangesAsync();
 
-            return RedirectToAction("Details", "Game");
+            return RedirectToAction("Details", "Game",new { id = id });
         }
+
     }
 }

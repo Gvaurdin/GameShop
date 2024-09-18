@@ -1,1 +1,58 @@
-﻿<h1>Библиотека</h1>
+﻿@using GameShop.Exstensions
+@using GameShopModel.Entities;
+@using GameShop.ViewModel;
+@model List<GameProduct>
+@{
+    ViewData["Title"] = "Библиотека игр";
+}
+
+<section class="h-100 h-custom" style="background-color: #eee;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-lg-7">
+                                <h5 class="mb-3">Библиотека игр</h5>
+                                <hr>
+                                @if (ViewBag.Message != null)
+                                {
+                                    <p>@ViewBag.Message</p>
+                                }
+                                else
+                                {
+                                    @foreach (var GameProduct in Model)
+                                    {
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div>
+                                                            <img src="@GameProduct.PresentationImageURL"
+                                                                 class="img-fluid rounded-3" alt="@GameProduct.Title" style="width: 65px;">
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <h5>@GameProduct.Title</h5>
+                                                            <p class="small mb-0">@GameProduct.Description.Truncate(60)...</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div style="width: 90px;">
+                                                            <h5 class="mb-0">@GameProduct.Price р</h5>
+                                                        </div>
+                                                        <a asp-controller="Game" asp-action="Details" asp-route-id="@GameProduct.Id" type="button" class="btn btn-danger">Перейти</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

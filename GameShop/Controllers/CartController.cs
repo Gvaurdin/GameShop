@@ -1,12 +1,15 @@
 ﻿using GameShop.Repository;
 using GameShop.Repository.Interfaces;
 using GameShop.ViewModel;
+using GameShopModel.Data;
+using GameShopModel.Entities;
 using GameShopModel.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GameShop.Controllers
 {
-    public class CartController(IGameProductRepository gameProductRepository,IRepositoryCart repositoryCart) : Controller
+    public class CartController(IHttpContextAccessor httpContextAccessor, GameShopContext gameShopContext,IRepositoryCart repositoryCart) : Controller
     {
         public IActionResult Index()
         {
@@ -20,19 +23,51 @@ namespace GameShop.Controllers
 
         }
 
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var product = await gameProductRepository.GetGameProductAsync(id);
             repositoryCart.Delete(id);
-            return View("Index", repositoryCart.GetProducts());
+            var products = repositoryCart.GetProducts();
+            var cartViewModel = new CartViewModel
+            {
+                GameProducts = products,
+                Sum = repositoryCart.GetSum
+            };
+            return View("Index",cartViewModel);
         }
 
-        public IActionResult PlaceOrder()
+        public async Task<IActionResult> PlaceOrder()
         {
-            var products = repositoryCart.GetProducts();
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                var user = gameShopContext.Users.Where(x => x.Id == idUser).First();
+                var products = repositoryCart.GetProducts();
 
-            // сохраняю в бд
-            repositoryCart.Clear();
+                var cart = new Cart
+                {
+                    User = user,
+                    GameProducts = [],
+                    Sum = repositoryCart.GetSum,
+                    DatePurchase = DateTime.Now
+
+                };
+
+                foreach (var product in products)
+                {
+                    var gameProduct = gameShopContext.GameProducts
+                        .Where(gameProduct => gameProduct.Id == product.Id)
+                        .First();
+                    cart.GameProducts.Add(gameProduct);
+                }
+
+                await gameShopContext.Carts.AddAsync(cart);
+                await gameShopContext.SaveChangesAsync();
+                repositoryCart.Clear();
+            }
+            else
+            {
+                return Unauthorized();
+            }
 
             return RedirectToAction("Index", "Home");
         }
