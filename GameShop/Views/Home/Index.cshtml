@@ -2,10 +2,16 @@
 @using GameShop.ViewModel
 @using GameShopModel.Entities
 @model GameIndexViewModel
-@if (User.Identity.IsAuthenticated && (User.IsInRole("user")))
+@if (User.Identity.IsAuthenticated && (User.IsInRole("user") || User.IsInRole("admin")))
 {
     <div class="container-fluid">
         <div class="row justify-content-start">
+            <form asp-controller="Home" asp-action="Index" method="post">
+                <p>
+                    Название игры: <input type="text" name="SearchString" />
+                    <input type="submit" value="Поиск" />
+                </p>
+            </form>
             @foreach (var gameProduct in Model.Games)
             {
                 var gameStatus = Model.GameStatuses[gameProduct.Id];
@@ -29,7 +35,7 @@
                             }
                             else
                             {
-                                <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@gameProduct.Id" class="btn btn-primary">Купить</a>
+                                <a asp-controller="Game" asp-action="Add" asp-route-id="@gameProduct.Id" class="btn btn-primary">Купить</a>
                             }
                         </div>
                     </a>

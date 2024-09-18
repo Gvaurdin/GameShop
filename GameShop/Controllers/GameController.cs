@@ -12,7 +12,11 @@ using System.Security.Claims;
 
 namespace GameShop.Controllers
 {
-    public class GameController(IHttpContextAccessor httpContextAccessor,GameShopContext gameShopContext, IGameProductRepository gameProductRepository, IRepositoryCart repositoryCart) : Controller
+    public class GameController(IHttpContextAccessor httpContextAccessor,
+        GameShopContext gameShopContext,
+        IGameProductRepository gameProductRepository,
+        IRepositoryCart repositoryCart,
+        IRepositoryWishList repositoryWishList) : Controller
     {
         public async Task<IActionResult> Details(int id)
         {
@@ -44,8 +48,7 @@ namespace GameShop.Controllers
 
                 if (wishListEntry != null)
                 {
-                    gameShopContext.WishLists.Remove(wishListEntry);
-                    await gameShopContext.SaveChangesAsync();
+                    await repositoryWishList.DeleteAsync(wishListEntry.User.Id, wishListEntry.GameProduct.Id);
                 }
 
                 // Обновляем статус, что игра больше не в списке желаемого
@@ -76,16 +79,18 @@ namespace GameShop.Controllers
             var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var user = await gameShopContext.Users.FirstAsync(user => user.Id == idUser);
             var gameProduct = await gameProductRepository.GetGameProductAsync(id);
-            var wishList = new WishList
-            {
-                GameProduct = gameProduct,
-                User = user
-            };
-            
-            await gameShopContext.WishLists.AddAsync(wishList);
-            await gameShopContext.SaveChangesAsync();
-
+            await repositoryWishList.AddAsync(user, gameProduct);
             return RedirectToAction("Details", "Game",new { id = id });
+        }
+
+        public async Task<IActionResult> DeleteWishList(int id)
+        {
+            var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var user = await gameShopContext.Users.FirstAsync(user => user.Id == idUser);
+            var gameProduct = await gameProductRepository.GetGameProductAsync(id);
+            await repositoryWishList.DeleteAsync(user.Id, gameProduct.Id);
+
+            return RedirectToAction("WishList", "Home");
         }
 
     }

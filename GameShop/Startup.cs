@@ -1,4 +1,5 @@
-﻿using GameShop.Repository;
+﻿using GameShop.Core;
+using GameShop.Repository;
 using GameShop.Repository.Interfaces;
 using GameShopModel.Data;
 using GameShopModel.Entities;
@@ -29,7 +30,7 @@ namespace GameShop
 
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
             app.UseAuthentication();

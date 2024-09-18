@@ -9,7 +9,10 @@ using System.Security.Claims;
 
 namespace GameShop.Controllers
 {
-    public class CartController(IHttpContextAccessor httpContextAccessor, GameShopContext gameShopContext,IRepositoryCart repositoryCart) : Controller
+    public class CartController(IHttpContextAccessor httpContextAccessor,
+        GameShopContext gameShopContext,
+        IRepositoryCart repositoryCart,
+        IRepositoryWishList repositoryWishList) : Controller
     {
         public IActionResult Index()
         {
@@ -49,7 +52,6 @@ namespace GameShop.Controllers
                     GameProducts = [],
                     Sum = repositoryCart.GetSum,
                     DatePurchase = DateTime.Now
-
                 };
 
                 foreach (var product in products)
@@ -57,6 +59,12 @@ namespace GameShop.Controllers
                     var gameProduct = gameShopContext.GameProducts
                         .Where(gameProduct => gameProduct.Id == product.Id)
                         .First();
+                    var wishGameProduct = gameShopContext.WishLists
+                        .FirstOrDefault(wl => wl.GameProduct.Id == product.Id && wl.User.Id == user.Id);
+                    if(wishGameProduct != null)
+                    {
+                        await repositoryWishList.DeleteAsync(wishGameProduct.User.Id, wishGameProduct.GameProduct.Id);
+                    }
                     cart.GameProducts.Add(gameProduct);
                 }
 

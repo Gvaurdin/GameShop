@@ -1,7 +1,9 @@
-﻿using GameShop.Repository;
+﻿using GameShop.Exstensions;
+using GameShop.Repository;
 using GameShop.Repository.Interfaces;
 using GameShop.ViewModel;
 using GameShopModel.Data;
+using GameShopModel.Entities;
 using GameShopModel.Repositories;
 using GameShopModel.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,24 +12,36 @@ using System.Security.Claims;
 
 namespace GameShop.Controllers
 {
-    public class HomeController(IHttpContextAccessor httpContextAccessor,GameShopContext gameShopContext,IGameProductRepository gameProductRepository, IRepositoryCart repositoryCart) : Controller
+    public class HomeController(IHttpContextAccessor httpContextAccessor,
+        GameShopContext gameShopContext,
+        IGameProductRepository gameProductRepository,
+        IRepositoryCart repositoryCart,
+        IGameStatusService gameStatusService) : Controller
     {
+        private const int countPopularGame = 100;
         public async Task<IActionResult> Index()
-        {
+       {
             var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
             var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var cartProducts = repositoryCart.GetProducts();
-            var libraryGames = await gameShopContext.Carts
-                .AsNoTracking()
-                .Include(cart => cart.GameProducts)
-                .Where(cart => cart.User.Id == idUser)
-                .SelectMany(cart => cart.GameProducts)
-                .ToListAsync();
-            var gameStatuses = gameProducts.ToDictionary(game => game.Id, game => new GameStatusViewModel
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProducts, idUser!);
+            var viewmodel = new GameIndexViewModel
             {
-                IsInCart = cartProducts.Any(p => p.Id == game.Id),
-                IsInLibrary = libraryGames.Any(p => p.Id == game.Id)
-            });
+                Games = gameProducts,
+                GameStatuses = gameStatuses
+            };
+            return View(viewmodel);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Index(string searchString)
+        {
+            var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                gameProducts = gameProducts.Where(gameProduct => gameProduct.Title.ToUpper().Contains(searchString.ToUpper())).ToList();
+            }
+            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProducts, idUser!);
 
             var viewmodel = new GameIndexViewModel
             {
@@ -37,9 +51,25 @@ namespace GameShop.Controllers
             return View(viewmodel);
         }
 
-        public IActionResult PopularGames()
+        public async Task<IActionResult> PopularGames()
         {
-            return View();
+            var currentDate = DateTime.Now;
+            var monthAgo = currentDate.AddMonths(-1);
+            var gamesCarts = await gameShopContext.Carts
+                .Include(cart => cart.GameProducts)
+                .Between(cart => cart.DatePurchase, monthAgo, currentDate)
+                .Take(countPopularGame).ToListAsync();
+            var games = gamesCarts.SelectMany(cart => cart.GameProducts).Distinct().ToList();
+            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(games, idUser!);
+
+            var viewmodel = new GameIndexViewModel
+            {
+                Games = games,
+                GameStatuses = gameStatuses
+            };
+
+            return View(viewmodel);
         }
 
         public IActionResult RecommendationGames()
@@ -57,21 +87,5 @@ namespace GameShop.Controllers
             return View(wishList);
         }
 
-        public async Task<IActionResult> DeleteWishList(int id)
-        {
-            var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var user = await gameShopContext.Users.FirstAsync(user => user.Id == idUser);
-            var gameProduct = await gameProductRepository.GetGameProductAsync(id);
-
-            var wishList = await gameShopContext.WishLists
-                .Include(wishlist => wishlist.User)
-                .Include(wishlist => wishlist.GameProduct)
-                .Where(wishlist => wishlist.GameProduct.Id == id && wishlist.User.Id == idUser)
-                .ExecuteDeleteAsync();
-
-            await gameShopContext.SaveChangesAsync();
-
-            return RedirectToAction("WishList", "Home");
-        }
     }
 }

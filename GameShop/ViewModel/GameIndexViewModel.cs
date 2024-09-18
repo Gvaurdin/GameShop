@@ -6,5 +6,6 @@ namespace GameShop.ViewModel
     {
         public List<GameProduct> Games { get; set; }
         public Dictionary<int, GameStatusViewModel> GameStatuses { get; set; }
+
     }
 }

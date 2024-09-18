@@ -1,1 +1,41 @@
-﻿<h1>Популярные игры</h1>
+﻿@using GameShop.Exstensions
+@using GameShop.ViewModel
+@using GameShopModel.Entities
+@model GameIndexViewModel
+@if (User.Identity.IsAuthenticated && (User.IsInRole("user") || User.IsInRole("admin")))
+{
+    <div class="container-fluid">
+        <div class="row justify-content-start">
+            <h1>Популярные игры</h1>
+            @foreach (var gameProduct in Model.Games)
+            {
+                var gameStatus = Model.GameStatuses[gameProduct.Id];
+                <div class="card" style="width: 18rem;">
+                    <a asp-controller="Game" asp-action="Details" asp-route-id="@gameProduct.Id" style="text-decoration: inherit; color:inherit">
+                        <img src="@gameProduct.PresentationImageURL" class="card-img-top" alt="@gameProduct.Title" />
+                        <div class="card-body">
+                            <h5 class="card-title">@gameProduct.Title</h5>
+                            <p class="card-text">@gameProduct.Description.Truncate(60)...</p>
+                            <p class="card-text">@gameProduct.Price₽</p>
+
+                            @if (gameStatus.IsInLibrary)
+                            {
+                                <!-- игра уже в библиотеке, кнопку скрываем -->
+                                <p class="text-muted">Игра уже в библиотеке</p>
+                            }
+                            else if (gameStatus.IsInCart)
+                            {
+                                <!-- игра в корзине, кнопку блокируем -->
+                                <a class="btn btn-secondary" disabled>В корзине</a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Game" asp-action="Add" asp-route-id="@gameProduct.Id" class="btn btn-primary">Купить</a>
+                            }
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+}
