@@ -12,7 +12,40 @@
             color: #fff;
             cursor: not-allowed;
         }
+
+        /* Настроим кнопки карусели */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 5%; /* Уменьшенная ширина для кнопок */
+            z-index: 2; /* Устанавливаем их поверх карусели */
+        }
+
+        /* Сдвигаем кнопки за пределы карусели, чтобы они не перекрывали видео */
+        .carousel-control-prev {
+            left: -5px; /* Левую кнопку немного выносим за пределы */
+        }
+
+        .carousel-control-next {
+            right: -5px; /* Правую кнопку также выносим за пределы */
+        }
+
+        /* Видео в карусели */
+        .carousel-item video {
+            z-index: 1; /* Видео ниже кнопок, чтобы не перекрывать их */
+            pointer-events: auto; /* Включаем взаимодействие с видео */
+            position: relative;
+            width: 100%; /* Устанавливаем полную ширину для видео */
+            margin: 0 auto; /* Центрируем видео */
+        }
+
+        /* Убедимся, что кнопки переключения будут выше, но не мешают видео */
+        .carousel-control-prev,
+        .carousel-control-next {
+            z-index: 3; 
+        }
     </style>
+
+
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -61,6 +94,8 @@
             </div>
         </div>
     </nav>
+    <script src="~/js/bootstrap.bundle.js"></script>
+    <script src="~/js/jquery-3.6.0.min.js"></script>
     <div>
         @RenderBody()
     </div>

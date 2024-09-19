@@ -6,19 +6,56 @@
         <div class="col-lg-6">
             <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <video src="@Model.GameProduct.Videos[0].URL" class="d-block w-100" controls></video>
-                    </div>
-                    @for (int i = 1; i < Model.GameProduct.Videos.Count; i++)
+                    @if (Model.GameProduct.Videos.Count > 0)
                     {
-                        <div class="carousel-item">
-                            <video src="@Model.GameProduct.Videos[i].URL" class="d-block w-100" controls></video>
+                        <div class="carousel-item active">
+                            <video src="@Model.GameProduct.Videos[0].URL" class="d-block w-100" controls></video>
                         </div>
                     }
-                    @foreach (var image in Model.GameProduct.Images)
+                    else if (Model.GameProduct.Images.Count > 0)
+                    {
+                        <div class="carousel-item active">
+                            <img src="@Model.GameProduct.Images[0].URL" class="d-block w-100" alt="@Model.GameProduct.Title"></img>
+                        </div>
+                    }
+                    @if (Model.GameProduct.Videos.Count > 0 && Model.GameProduct.Images.Count > 0)
+                    {
+                        @for (int i = 1; i < Model.GameProduct.Videos.Count; i++)
+                        {
+                            <div class="carousel-item">
+                                <video src="@Model.GameProduct.Videos[i].URL" class="d-block w-100" controls></video>
+                            </div>
+                        }
+                        @for (int i = 1; i < Model.GameProduct.Images.Count; i++)
+                        {
+                            <div class="carousel-item">
+                                <img src="@Model.GameProduct.Images[i].URL" class="d-block w-100" alt="@Model.GameProduct.Title" />
+                            </div>
+                        }
+
+                    }
+                    else if (Model.GameProduct.Videos.Count == 0 && Model.GameProduct.Images.Count > 0)
+                    {
+                        @for (int i = 1; i < Model.GameProduct.Images.Count; i++)
+                        {
+                            <div class="carousel-item">
+                                <img src="@Model.GameProduct.Images[i].URL" class="d-block w-100" alt="@Model.GameProduct.Title" />
+                            </div>
+                        }
+                    }
+                    else if (Model.GameProduct.Videos.Count > 0 && Model.GameProduct.Images.Count == 0)
+                    {
+                        @for (int i = 1; i < Model.GameProduct.Videos.Count; i++)
+                        {
+                            <div class="carousel-item">
+                                <video src="@Model.GameProduct.Videos[i].URL" class="d-block w-100" controls></video>
+                            </div>
+                        }
+                    }
+                    else
                     {
                         <div class="carousel-item">
-                            <img src="@image.URL" class="d-block w-100" alt="@Model.GameProduct.Title" />
+                            <img src="/Images/нет контента.png" class="d-block w-100" alt="Нет контента"></img>
                         </div>
                     }
                 </div>
@@ -95,7 +132,7 @@
             </tbody>
         </table>
 
-        @if(Model.GameProduct.RecommendedSystemRequirement is not null)
+        @if (Model.GameProduct.RecommendedSystemRequirement is not null)
         {
             <table class="table">
                 <thead>
@@ -124,3 +161,28 @@
         }
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var carouselElement = document.getElementById('"productCarousel');
+            var carousel = new bootstrap.Carousel(carouselElement);
+            // Отключить автопрокрутку, когда пользователь взаимодействует с видео
+            carouselElement.querySelectorAll('video').forEach(function (video) {
+                video.addEventListener('play', function () {
+                    carousel.pause(); // Остановить автопрокрутку
+                });
+                video.addEventListener('pause', function () {
+                    carousel.cycle(); // Восстановить автопрокрутку, если видео остановлено
+                });
+            });
+            // Отключение смены слайдов при клике по видео
+            carouselElement.querySelectorAll('video').forEach(function (video) {
+                video.addEventListener('click', function (event) {
+                    event.stopPropagation(); // Останавливает переключение слайда при клике на видео
+                });
+            });
+        });
+    </script>
+}

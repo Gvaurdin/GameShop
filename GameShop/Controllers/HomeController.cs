@@ -7,6 +7,7 @@ using GameShopModel.Entities;
 using GameShopModel.Repositories;
 using GameShopModel.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -19,37 +20,54 @@ namespace GameShop.Controllers
         IGameStatusService gameStatusService) : Controller
     {
         private const int countPopularGame = 100;
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string gameGenre,string titleSearchString)
        {
-            var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
-            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProducts, idUser!);
-            var viewmodel = new GameIndexViewModel
+            //var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
+            var gameProductGenre = from g in gameShopContext.Genres
+                               select g;
+            var gameProducts = from g in gameShopContext.GameProducts
+                               select g;
+            if(!string.IsNullOrEmpty(titleSearchString))
             {
-                Games = gameProducts,
-                GameStatuses = gameStatuses
-            };
-            return View(viewmodel);
-        }
+                gameProducts = gameProducts.Where(gp => gp.Title.ToUpper().Contains(titleSearchString.ToUpper()));
+            }
 
-        [HttpPost]
-        public async Task<ActionResult> Index(string searchString)
-        {
-            var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(gameGenre))
             {
-                gameProducts = gameProducts.Where(gameProduct => gameProduct.Title.ToUpper().Contains(searchString.ToUpper())).ToList();
+                gameProducts = gameProducts
+                    .Include(gp => gp.Genres)
+                    .Where(gp => 
+                          (gp.Genres.Where(genre =>
+                                           genre.Title.Contains(gameGenre))).Any());
             }
             var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProducts, idUser!);
-
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync([.. gameProducts], idUser!);
             var viewmodel = new GameIndexViewModel
             {
-                Games = gameProducts,
-                GameStatuses = gameStatuses
+                Games = await gameProducts.ToListAsync(),
+                GameStatuses = gameStatuses,
+                GameGenres = new SelectList(await gameProductGenre.Select(genre => genre.Title).ToListAsync())
             };
             return View(viewmodel);
         }
+
+        //public async Task<ActionResult> Index(string searchString)
+        //{
+        //    var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
+        //    if (!string.IsNullOrEmpty(searchString))
+        //    {
+        //        gameProducts = gameProducts.Where(gameProduct => gameProduct.Title.ToUpper().Contains(searchString.ToUpper())).ToList();
+        //    }
+        //    var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProducts, idUser!);
+
+        //    var viewmodel = new GameIndexViewModel
+        //    {
+        //        Games = gameProducts,
+        //        GameStatuses = gameStatuses
+        //    };
+        //    return View(viewmodel);
+        //}
 
         public async Task<IActionResult> PopularGames()
         {
