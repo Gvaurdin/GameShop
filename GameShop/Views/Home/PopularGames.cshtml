@@ -1,13 +1,33 @@
 ﻿@using GameShop.Exstensions
 @using GameShop.ViewModel
 @using GameShopModel.Entities
-@model GameIndexViewModel
+@model GameProductsVM
 @if (User.Identity.IsAuthenticated && (User.IsInRole("user") || User.IsInRole("admin")))
 {
     <div class="container-fluid">
         <div class="row justify-content-start">
             <h1>Популярные игры</h1>
-            @foreach (var gameProduct in Model.Games)
+            <form asp-controller="Home" asp-action="Index" method="get">
+                Жанр:
+                <select name="selectedGenreGameProduct"
+                        asp-for="FilteredGameProductVM.SelectGenreGameProduct"
+                        asp-items="Model.FilteredGameProductVM.Genres">
+                    <option value="">Все</option>
+                </select>
+
+                Фильтрация:
+                <select name="sortGameProductState"
+                        asp-for="SortGameProductVM.SortTitleGameProduct">
+                    <option value="">Все</option>
+                    <option value="TitleAsc">По алфавиту ( от А до Я)</option>
+                    <option value="TitleDesc">По алфавиту (от Я до А)</option>
+                </select>
+
+                Название игры: <input name="selectedTitleGameProduct" value="@Model.FilteredGameProductVM.SelectTitleGameProduct" type="text" />
+                <input type="submit" value="Поиск" />
+
+            </form>
+            @foreach (var gameProduct in Model.GameProducts)
             {
                 var gameStatus = Model.GameStatuses[gameProduct.Id];
                 <div class="card" style="width: 18rem;">
@@ -38,4 +58,29 @@
             }
         </div>
     </div>
+}
+
+@if (Model.PageViewModel.HasPreviousPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+       asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+       asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)" class="btn btn-outline-dark">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        Назад
+    </a>
+}
+
+
+@if (Model.PageViewModel.HasNextPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+       asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+       asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+       asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
+       class="btn btn-outline-dark">
+        Вперед
+        <i class="glyphicon glyphicon-chevron-right"></i>
+    </a>
 }

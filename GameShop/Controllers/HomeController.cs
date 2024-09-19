@@ -1,4 +1,5 @@
-﻿using GameShop.Exstensions;
+﻿using GameShop.Core;
+using GameShop.Exstensions;
 using GameShop.Repository;
 using GameShop.Repository.Interfaces;
 using GameShop.ViewModel;
@@ -20,36 +21,90 @@ namespace GameShop.Controllers
         IGameStatusService gameStatusService) : Controller
     {
         private const int countPopularGame = 100;
-        public async Task<IActionResult> Index(string gameGenre,string titleSearchString)
-       {
-            //var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
-            var gameProductGenre = from g in gameShopContext.Genres
-                               select g;
+        private const int pageSize = 10;
+
+        public async Task<IActionResult> Index(string selectedGenreGameProduct,
+            string selectedTitleGameProduct,
+            SortGameProductState sortGameProductState,
+            int page = 1)
+        {
             var gameProducts = from g in gameShopContext.GameProducts
                                select g;
-            if(!string.IsNullOrEmpty(titleSearchString))
+            var gameProductGenres = await gameShopContext.Genres
+                .Select(g => g.Title)
+                .Distinct()
+                .ToListAsync();
+            if (!string.IsNullOrEmpty(selectedTitleGameProduct))
             {
-                gameProducts = gameProducts.Where(gp => gp.Title.ToUpper().Contains(titleSearchString.ToUpper()));
+                gameProducts = gameProducts
+                    .Where(gm => gm.Title.ToUpper().Contains(selectedTitleGameProduct.ToUpper()));
             }
 
-            if (!string.IsNullOrEmpty(gameGenre))
+            if (!string.IsNullOrEmpty(selectedGenreGameProduct))
             {
                 gameProducts = gameProducts
                     .Include(gp => gp.Genres)
-                    .Where(gp => 
-                          (gp.Genres.Where(genre =>
-                                           genre.Title.Contains(gameGenre))).Any());
+                    .Where(gp => gp.Genres.Any(genre => genre.Title.Contains(selectedGenreGameProduct)));
             }
-            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var gameStatuses = await gameStatusService.GetGameStatusesAsync([.. gameProducts], idUser!);
-            var viewmodel = new GameIndexViewModel
+
+            gameProducts = sortGameProductState switch
             {
-                Games = await gameProducts.ToListAsync(),
-                GameStatuses = gameStatuses,
-                GameGenres = new SelectList(await gameProductGenre.Select(genre => genre.Title).ToListAsync())
+                SortGameProductState.TitleAsc => gameProducts.OrderBy(gp => gp.Title),
+                SortGameProductState.TitleDesc => gameProducts.OrderByDescending(gp => gp.Title),
+                _ => gameProducts
             };
-            return View(viewmodel);
+
+            var count = await gameProducts.CountAsync();
+
+            var gameProductsResult = await gameProducts
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProductsResult, idUser!);
+
+            var gameProductsVM = new GameProductsVM 
+            {
+                GameProducts = gameProductsResult,
+                PageViewModel = new(count,page,pageSize),
+                SortGameProductVM = new(sortGameProductState),
+                FilteredGameProductVM = new(new(gameProductGenres),selectedGenreGameProduct,selectedTitleGameProduct),
+                GameStatuses = gameStatuses
+            };
+
+            return View(gameProductsVM);
         }
+
+        // public async Task<IActionResult> Index(string gameGenre,string titleSearchString)
+        //{
+        //     //var gameProducts = await gameProductRepository.GetAllGameProductsAsync();
+        //     var gameProductGenre = from g in gameShopContext.Genres
+        //                        select g;
+        //     var gameProducts = from g in gameShopContext.GameProducts
+        //                        select g;
+        //     if(!string.IsNullOrEmpty(titleSearchString))
+        //     {
+        //         gameProducts = gameProducts.Where(gp => gp.Title.ToUpper().Contains(titleSearchString.ToUpper()));
+        //     }
+
+        //     if (!string.IsNullOrEmpty(gameGenre))
+        //     {
+        //         gameProducts = gameProducts
+        //             .Include(gp => gp.Genres)
+        //             .Where(gp => 
+        //                   (gp.Genres.Where(genre =>
+        //                                    genre.Title.Contains(gameGenre))).Any());
+        //     }
+        //     var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //     var gameStatuses = await gameStatusService.GetGameStatusesAsync([.. gameProducts], idUser!);
+        //     var viewmodel = new GameIndexViewModel
+        //     {
+        //         Games = await gameProducts.ToListAsync(),
+        //         GameStatuses = gameStatuses,
+        //         GameGenres = new SelectList(await gameProductGenre.Select(genre => genre.Title).ToListAsync())
+        //     };
+        //     return View(viewmodel);
+        // }
 
         //public async Task<ActionResult> Index(string searchString)
         //{
@@ -69,7 +124,10 @@ namespace GameShop.Controllers
         //    return View(viewmodel);
         //}
 
-        public async Task<IActionResult> PopularGames()
+        public async Task<IActionResult> PopularGames(string selectedGenreGameProduct,
+            string selectedTitleGameProduct,
+            SortGameProductState sortGameProductState,
+            int page = 1)
         {
             var currentDate = DateTime.Now;
             var monthAgo = currentDate.AddMonths(-1);
@@ -77,17 +135,51 @@ namespace GameShop.Controllers
                 .Include(cart => cart.GameProducts)
                 .Between(cart => cart.DatePurchase, monthAgo, currentDate)
                 .Take(countPopularGame).ToListAsync();
-            var games = gamesCarts.SelectMany(cart => cart.GameProducts).Distinct().ToList();
-            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var gameStatuses = await gameStatusService.GetGameStatusesAsync(games, idUser!);
-
-            var viewmodel = new GameIndexViewModel
+            var games = gamesCarts.SelectMany(cart => cart.GameProducts).Distinct();
+            var gameProductGenres = await gameShopContext.Genres
+                                          .Select(g => g.Title)
+                                          .Distinct()
+                                          .ToListAsync();
+            if (!string.IsNullOrEmpty(selectedTitleGameProduct))
             {
-                Games = games,
+                games = games
+                    .Where(gm => gm.Title.ToUpper().Contains(selectedTitleGameProduct.ToUpper()));
+            }
+
+            if (!string.IsNullOrEmpty(selectedGenreGameProduct))
+            {
+                games = await games
+                    .AsQueryable()
+                    .Include(gp => gp.Genres)
+                    .Where(gp => gp.Genres.Any(genre => genre.Title.Contains(selectedGenreGameProduct)))
+                    .ToListAsync();
+            }
+
+            games = sortGameProductState switch
+            {
+                SortGameProductState.TitleAsc => games.OrderBy(gp => gp.Title),
+                SortGameProductState.TitleDesc => games.OrderByDescending(gp => gp.Title),
+                _ => games
+            };
+
+            var count = games.Count();
+            var gameProductsResult = games
+                                     .Skip((page - 1) * pageSize)
+                                     .Take(pageSize);
+            var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProductsResult.ToList(), idUser!);
+
+
+            var gameProductsVM = new GameProductsVM
+            {
+                GameProducts = gameProductsResult,
+                PageViewModel = new(count, page, pageSize),
+                SortGameProductVM = new(sortGameProductState),
+                FilteredGameProductVM = new(new(gameProductGenres), selectedGenreGameProduct, selectedTitleGameProduct),
                 GameStatuses = gameStatuses
             };
 
-            return View(viewmodel);
+            return View(gameProductsVM);
         }
 
         public IActionResult RecommendationGames()

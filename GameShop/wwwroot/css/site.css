@@ -1,0 +1,74 @@
+﻿.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2') format('woff2'), url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff') format('woff'), url('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/fonts/fontawesome-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.glyphicon {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.glyphicon-chevron-right:before {
+    content: "\f054";
+}
+
+.glyphicon-chevron-left:before {
+    content: "\f053";
+}
+
+.btn-disabled {
+    background-color: #6c757d;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+/* Настроим кнопки карусели */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%; /* Уменьшенная ширина для кнопок */
+    z-index: 2; /* Устанавливаем их поверх карусели */
+}
+
+/* Сдвигаем кнопки за пределы карусели, чтобы они не перекрывали видео */
+.carousel-control-prev {
+    left: -5px; /* Левую кнопку немного выносим за пределы */
+}
+
+.carousel-control-next {
+    right: -5px; /* Правую кнопку также выносим за пределы */
+}
+
+/* Видео в карусели */
+.carousel-item video {
+    z-index: 1; /* Видео ниже кнопок, чтобы не перекрывать их */
+    pointer-events: auto; /* Включаем взаимодействие с видео */
+    position: relative;
+    width: 100%; /* Устанавливаем полную ширину для видео */
+    margin: 0 auto; /* Центрируем видео */
+}
+
+/* Убедимся, что кнопки переключения будут выше, но не мешают видео */
+.carousel-control-prev,
+.carousel-control-next {
+    z-index: 3;
+}

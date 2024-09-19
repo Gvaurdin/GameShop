@@ -1,22 +1,32 @@
 ﻿@using GameShop.Exstensions
 @using GameShop.ViewModel
 @using GameShopModel.Entities
-@model GameIndexViewModel
+@model GameProductsVM
 @if (User.Identity.IsAuthenticated && (User.IsInRole("user") || User.IsInRole("admin")))
 {
     <div class="container mt-5">
         <form asp-controller="Home" asp-action="Index" method="get">
             Жанр:
-            <select asp-for="GameGenre" asp-items="Model.GameGenres">
+            <select name="selectedGenreGameProduct"
+                asp-for="FilteredGameProductVM.SelectGenreGameProduct"
+                asp-items="Model.FilteredGameProductVM.Genres">
                 <option value="">Все</option>
             </select>
 
-            Название игры: <input type="text" asp-for="TitleSearchString" />
+            Фильтрация:
+            <select name="sortGameProductState"
+                    asp-for="SortGameProductVM.SortTitleGameProduct">
+                <option value="">Все</option>
+                    <option value="TitleAsc">По алфавиту ( от А до Я)</option>
+                        <option value="TitleDesc">По алфавиту (от Я до А)</option>
+            </select>
+
+            Название игры: <input name="selectedTitleGameProduct" value="@Model.FilteredGameProductVM.SelectTitleGameProduct" type="text" />
             <input type="submit" value="Поиск" />
 
         </form>
         <div class="row row-cols-4 gap-3 mt-4">
-            @foreach (var gameProduct in Model.Games)
+            @foreach (var gameProduct in Model.GameProducts)
             {
                 //var gameStatus = Model.GameStatuses[gameProduct.Id];
                 <div class="card" style="width: 18rem;">
@@ -49,33 +59,31 @@
         </div>
     </div>
 }
-@*             <div class="card">
-    <img src="https://assets.codepen.io/6093409/mountains-1.jpg" alt="a snow-capped mountain range" />
-    <div class="card-body">
-    <h2 class="card-title">Mountains</h2>
-    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
-    <a href="#" class="btn btn-secondary">Learn more</a>
-    </div>
-    </div>
-    <div class="card">
-    <img src="https://assets.codepen.io/6093409/mountains-4.jpg" alt="a snowy mountain with clouds behind it" />
-    <div class="card-body">
-    <h2 class="card-title">Mountains</h2>
-    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
-    <a href="#" class="btn btn-secondary">Learn more</a>
-    </div>
-    </div>
-    <div class="card">
-    <img src="https://assets.codepen.io/6093409/mountains-3.jpg" alt="a mountain range under a thin layer of clouds" />
-    <div class="card-body">
-    <h2 class="card-title">Mountains</h2>
-    <p class="card-text">This is a photo of snowy-covered mountains. How majestic.</p>
-    <a href="#" class="btn btn-secondary">Learn more</a>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div> *@
+
+@if (Model.PageViewModel.HasPreviousPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+       asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+       asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)" class="btn btn-outline-dark">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        Назад
+    </a>
+}
+
+
+@if (Model.PageViewModel.HasNextPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+       asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+       asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+       asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
+       class="btn btn-outline-dark">
+        Вперед
+        <i class="glyphicon glyphicon-chevron-right"></i>
+    </a>
+}
 
 
 
