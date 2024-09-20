@@ -26,7 +26,9 @@ using GameShop.Repository.Interfaces;
 using GameShopModel.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using GameShop.Repository.Repositories.Interfaces;
 using GameShop.Core;
+using GameShop.Repository.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +38,7 @@ builder.Services.AddTransient<IGameProductRepository, GameProductRepository>();
 builder.Services.AddSingleton<IRepositoryCart, RepositoryCart>();
 builder.Services.AddTransient<IRepositoryWishList, RepositoryWishList>();
 builder.Services.AddTransient<IGameStatusService,GameStatusService>();
+builder.Services.AddTransient<IRepositoryRecommendedGameProduct, RepositoryRecommendedGameProduct>();
 builder.Services.AddDbContext<GameShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GameShopContext") ??
     throw new InvalidOperationException("Connection string 'GameShopContext' not found.")));

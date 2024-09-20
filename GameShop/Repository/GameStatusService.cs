@@ -8,7 +8,7 @@ namespace GameShop.Repository
 {
     public class GameStatusService(GameShopContext gameShopContext, IRepositoryCart repositoryCart) : IGameStatusService
     {
-        public async Task<Dictionary<int, GameStatusViewModel>> GetGameStatusesAsync(List<GameProduct> gameProducts, string userId)
+        public async Task<Dictionary<int, GameStatusViewModel>> GetGameStatusesAsync(IQueryable<GameProduct> gameProducts, string userId)
         {
             var cartProducts = repositoryCart.GetProducts();
             var libraryGames = await gameShopContext.Carts

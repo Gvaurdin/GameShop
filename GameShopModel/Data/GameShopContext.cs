@@ -14,7 +14,7 @@ namespace GameShopModel.Data
         // new - перекрытия свойства identity
         public new DbSet<User>? Users { get; set; }
         public DbSet<Cart> Carts { get; set; }
-
+        public DbSet<RecommendedGameProduct> RecommendedGameProducts { get; set; }
         public DbSet<WishList> WishLists { get; set; }
         public DbSet<GameProduct> GameProducts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

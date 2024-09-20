@@ -4,29 +4,29 @@
 @model GameProductsVM
 @if (User.Identity.IsAuthenticated && (User.IsInRole("user") || User.IsInRole("admin")))
 {
-    <div class="container-fluid">
-        <div class="row justify-content-start">
-            <h1>Популярные игры</h1>
-            <form asp-controller="Home" asp-action="Index" method="get">
-                Жанр:
-                <select name="selectedGenreGameProduct"
-                        asp-for="FilteredGameProductVM.SelectGenreGameProduct"
-                        asp-items="Model.FilteredGameProductVM.Genres">
-                    <option value="">Все</option>
-                </select>
+    <div class="container mt-5">
+        <h1>Популярные игры</h1>
+        <form asp-controller="Home" asp-action="PopularGames" method="get">
+            Жанр:
+            <select name="selectedGenreGameProduct"
+                    asp-for="FilteredGameProductVM.SelectGenreGameProduct"
+                    asp-items="Model.FilteredGameProductVM.Genres">
+                <option value="">Все</option>
+            </select>
 
-                Фильтрация:
-                <select name="sortGameProductState"
-                        asp-for="SortGameProductVM.SortTitleGameProduct">
-                    <option value="">Все</option>
-                    <option value="TitleAsc">По алфавиту ( от А до Я)</option>
-                    <option value="TitleDesc">По алфавиту (от Я до А)</option>
-                </select>
+            Фильтрация:
+            <select name="sortGameProductState"
+                    asp-for="SortGameProductVM.SortTitleGameProduct">
+                <option value="">Все</option>
+                <option value="TitleAsc">По алфавиту ( от А до Я)</option>
+                <option value="TitleDesc">По алфавиту (от Я до А)</option>
+            </select>
 
-                Название игры: <input name="selectedTitleGameProduct" value="@Model.FilteredGameProductVM.SelectTitleGameProduct" type="text" />
-                <input type="submit" value="Поиск" />
+            Название игры: <input name="selectedTitleGameProduct" value="@Model.FilteredGameProductVM.SelectTitleGameProduct" type="text" />
+            <input type="submit" value="Поиск" />
 
-            </form>
+        </form>
+        <div class="row row-cols-4 gap-3 mt-4">
             @foreach (var gameProduct in Model.GameProducts)
             {
                 var gameStatus = Model.GameStatuses[gameProduct.Id];
@@ -37,33 +37,88 @@
                             <h5 class="card-title">@gameProduct.Title</h5>
                             <p class="card-text">@gameProduct.Description.Truncate(60)...</p>
                             <p class="card-text">@gameProduct.Price₽</p>
-
-                            @if (gameStatus.IsInLibrary)
-                            {
-                                <!-- игра уже в библиотеке, кнопку скрываем -->
-                                <p class="text-muted">Игра уже в библиотеке</p>
-                            }
-                            else if (gameStatus.IsInCart)
-                            {
-                                <!-- игра в корзине, кнопку блокируем -->
-                                <a class="btn btn-secondary" disabled>В корзине</a>
-                            }
-                            else
-                            {
-                                <a asp-controller="Game" asp-action="Add" asp-route-id="@gameProduct.Id" class="btn btn-primary">Купить</a>
-                            }
                         </div>
                     </a>
+                    @if (gameStatus.IsInLibrary)
+                    {
+                        <!-- игра уже в библиотеке, кнопку скрываем -->
+                        <p class="text-muted">Игра уже в библиотеке</p>
+                    }
+                    else if (gameStatus.IsInCart)
+                    {
+                        <!-- игра в корзине, кнопку блокируем -->
+                        <a class="btn btn-secondary" disabled>В корзине</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Game" asp-action="Add" asp-route-id="@gameProduct.Id" class="btn btn-primary">Купить</a>
+                    }
                 </div>
             }
         </div>
     </div>
 }
 
-@if (Model.PageViewModel.HasPreviousPage)
+@{
+    const string Disabled = "disabled";
+    const string Active = "active";
+    string isDisabledPreviousPage = string.Empty;
+    if (!Model.GameProducts.HasPreviousPage)
+    {
+        isDisabledPreviousPage = Disabled;
+    }
+
+    string isDisabledNextPage = string.Empty;
+    if (!Model.GameProducts.HasNextPage)
+    {
+        isDisabledNextPage = Disabled;
+    }
+}
+<nav>
+    <ul class="pagination">
+        <li class="page-item @isDisabledPreviousPage">
+            <a asp-action="PopularGames"
+               asp-route-page="@(Model.GameProducts.PageIndex - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+               asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+               asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
+               class="page-link" tabindex="-1"
+               aria-disabled="@Model.GameProducts.HasPreviousPage">Назад</a>
+        </li>
+        @for (int indexPage = 1; indexPage <= Model.GameProducts.TotalPages; indexPage++)
+        {
+            string isActive = string.Empty;
+            @if (indexPage == Model.GameProducts.PageIndex)
+            {
+                isActive = Active;
+            }
+
+            <li class="page-item @isActive">
+                <a asp-action="PopularGames"
+                   asp-route-page="@indexPage"
+                   asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+                   asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+                   asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
+                   class="page-link">@indexPage</a>
+            </li>
+
+        }
+
+        <li class="page-item @isDisabledNextPage">
+            <a asp-action="PopularGames"
+               asp-route-page="@(Model.GameProducts.PageIndex + 1)"
+               asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+               asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
+               asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
+               class="page-link"
+               aria-disabled="@Model.GameProducts.HasNextPage">Вперед</a>
+        </li>
+    </ul>
+</nav>
+
+@* @if (Model.GameProducts.HasPreviousPage)
 {
-    <a asp-action="Index"
-       asp-route-page="@(Model.PageViewModel.PageNumber - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
+    <a asp-action="PopularGames"
+       asp-route-page="@(Model.GameProducts.PageIndex - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
        asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
        asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)" class="btn btn-outline-dark">
         <i class="glyphicon glyphicon-chevron-left"></i>
@@ -72,10 +127,10 @@
 }
 
 
-@if (Model.PageViewModel.HasNextPage)
+@if (Model.GameProducts.HasNextPage)
 {
-    <a asp-action="Index"
-       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+    <a asp-action="PopularGames"
+       asp-route-page="@(Model.GameProducts.PageIndex + 1)"
        asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
        asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
        asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
@@ -83,4 +138,4 @@
         Вперед
         <i class="glyphicon glyphicon-chevron-right"></i>
     </a>
-}
+} *@

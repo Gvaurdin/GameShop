@@ -21,7 +21,7 @@ namespace GameShop.Controllers
         IGameStatusService gameStatusService) : Controller
     {
         private const int countPopularGame = 100;
-        private const int pageSize = 10;
+        private const int pageSize = 3;
 
         public async Task<IActionResult> Index(string selectedGenreGameProduct,
             string selectedTitleGameProduct,
@@ -54,21 +54,14 @@ namespace GameShop.Controllers
                 _ => gameProducts
             };
 
-            var count = await gameProducts.CountAsync();
-
-            var gameProductsResult = await gameProducts
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
             var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProductsResult, idUser!);
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProducts, idUser!);
 
-            var gameProductsVM = new GameProductsVM 
+            var gameProductsVM = new GameProductsVM
             {
-                GameProducts = gameProductsResult,
-                PageViewModel = new(count,page,pageSize),
+                GameProducts = await PaginationList<GameProduct>.CreateAsync(gameProducts, page, pageSize),
                 SortGameProductVM = new(sortGameProductState),
-                FilteredGameProductVM = new(new(gameProductGenres),selectedGenreGameProduct,selectedTitleGameProduct),
+                FilteredGameProductVM = new(new(gameProductGenres), selectedGenreGameProduct, selectedTitleGameProduct),
                 GameStatuses = gameStatuses
             };
 
@@ -131,10 +124,10 @@ namespace GameShop.Controllers
         {
             var currentDate = DateTime.Now;
             var monthAgo = currentDate.AddMonths(-1);
-            var gamesCarts = await gameShopContext.Carts
+            var gamesCarts = gameShopContext.Carts
                 .Include(cart => cart.GameProducts)
                 .Between(cart => cart.DatePurchase, monthAgo, currentDate)
-                .Take(countPopularGame).ToListAsync();
+                .Take(countPopularGame).AsQueryable();
             var games = gamesCarts.SelectMany(cart => cart.GameProducts).Distinct();
             var gameProductGenres = await gameShopContext.Genres
                                           .Select(g => g.Title)
@@ -148,11 +141,9 @@ namespace GameShop.Controllers
 
             if (!string.IsNullOrEmpty(selectedGenreGameProduct))
             {
-                games = await games
-                    .AsQueryable()
+                games = games
                     .Include(gp => gp.Genres)
-                    .Where(gp => gp.Genres.Any(genre => genre.Title.Contains(selectedGenreGameProduct)))
-                    .ToListAsync();
+                    .Where(gp => gp.Genres.Any(genre => genre.Title.Contains(selectedGenreGameProduct)));
             }
 
             games = sortGameProductState switch
@@ -162,18 +153,17 @@ namespace GameShop.Controllers
                 _ => games
             };
 
-            var count = games.Count();
-            var gameProductsResult = games
-                                     .Skip((page - 1) * pageSize)
-                                     .Take(pageSize);
+            //var count = games.Count();
+            //var gameProductsResult = games
+            //                         .Skip((page - 1) * pageSize)
+            //                         .Take(pageSize);
             var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var gameStatuses = await gameStatusService.GetGameStatusesAsync(gameProductsResult.ToList(), idUser!);
+            var gameStatuses = await gameStatusService.GetGameStatusesAsync(games, idUser!);
 
 
             var gameProductsVM = new GameProductsVM
             {
-                GameProducts = gameProductsResult,
-                PageViewModel = new(count, page, pageSize),
+                GameProducts = await PaginationList<GameProduct>.CreateAsync(games,page,pageSize),
                 SortGameProductVM = new(sortGameProductState),
                 FilteredGameProductVM = new(new(gameProductGenres), selectedGenreGameProduct, selectedTitleGameProduct),
                 GameStatuses = gameStatuses
@@ -182,9 +172,12 @@ namespace GameShop.Controllers
             return View(gameProductsVM);
         }
 
-        public IActionResult RecommendationGames()
+        public async Task<IActionResult> RecommendationGames()
         {
-            return View();
+            var recommendedGameProducts = await gameShopContext.RecommendedGameProducts
+                .Include(rgp => rgp.GameProduct)
+                .ToListAsync();
+            return View(recommendedGameProducts);
         }
 
         public async Task<IActionResult> WishList()

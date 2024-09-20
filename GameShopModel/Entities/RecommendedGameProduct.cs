@@ -6,15 +6,12 @@ using System.Threading.Tasks;
 
 namespace GameShopModel.Entities
 {
-    public class WishList
+    public class RecommendedGameProduct
     {
         public int Id { get; set; }
-
-        public required User User { get; set; }
-
+        public required string ExpertName { get; set; }
+        public required string ExpertSurname { get; set; }
         public int GameProductId { get; set; }
-        public required GameProduct GameProduct {  get; set; }
-
-
+        public GameProduct? GameProduct { get; set; }
     }
 }
