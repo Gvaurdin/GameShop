@@ -10,30 +10,25 @@ namespace GameShop.Controllers
     {
         public async Task<IActionResult> Index()
         {
-            Cart cart;
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            if(!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
             {
-                var idUser = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-                   cart = await gameShopContext.Carts
-                    .AsNoTracking()
-                    .Include(cart => cart.User)
-                    .Include(cart => cart.GameProducts)
-                    .Where(cart => cart.User.Id == idUser)
-                    .FirstOrDefaultAsync();
-
-                if (cart == null || !cart.GameProducts.Any())
-                {
-                    ViewBag.Message = "Ваша библиотека игр пуста.";
-                    return View(new List<GameProduct>()); 
-                }
-                return View(cart.GameProducts);
-
+                return RedirectToAction("Login", "Account");
             }
-            else
+
+            var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            var gameProducts = new List<GameProduct>();
+            var carts = gameShopContext.Carts
+                .Include(cart => cart.User)
+                .Include(cart => cart.GameProducts)
+                .Where(cart => cart.User.Id == idUser);
+
+            foreach (var cart in carts)
             {
-                return RedirectToAction("Account", "Login");
+                gameProducts.AddRange(cart.GameProducts);
             }
+
+            return View(gameProducts);
         }
     }
 }

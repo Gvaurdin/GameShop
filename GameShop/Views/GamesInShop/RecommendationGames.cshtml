@@ -1,0 +1,42 @@
+﻿@using GameShop.Controllers
+@using GameShopModel.Entities;
+@using GameShop.Exstensions;
+@{
+    ViewData["Title"] = "Рекомендованные игры";
+}
+@model Dictionary<NameSurname,List<GameProduct>>
+
+
+<div class="container mt-5">
+    <h1 class="mt-3">Рекомендованные игры: </h1>
+    <div class="row">
+        @foreach (var listGameProductByExperts in Model)
+        {
+            <div class="col-12">
+                <h2>@listGameProductByExperts.Key.Name</h2>
+                <h2>@listGameProductByExperts.Key.Surname</h2>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-4 gap-3 mt-3">
+                @foreach (var gameProduct in listGameProductByExperts.Value)
+                {
+                    <div class="col-12 col-md-4">
+                        <div class="card" style="width: 18rem;">
+                            <a asp-controller="Game" asp-action="Details" asp-route-id="@gameProduct.Id" style="text-decoration: inherit; color: inherit">
+                                <img src="@gameProduct.PresentationImageURL" class="card-img-top" alt="@gameProduct.Title">
+                                <div class="card-body">
+                                    <h5 class="card-title">@gameProduct.Title</h5>
+                                    <p class="card-text">@gameProduct.Description.Truncate(68)...</p>
+                                    <p class="card-text">@gameProduct.Price P</p>
+                                    <a asp-controller="Game" asp-action="Details" asp-route-id="@gameProduct.Id" class="btn btn-primary mt-2">Купить</a>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <br/>
+            <hr style="border: 1px solid #ccc;">
+        }
+    </div>
+</div>

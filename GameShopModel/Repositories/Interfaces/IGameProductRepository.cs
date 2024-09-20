@@ -10,13 +10,15 @@ namespace GameShopModel.Repositories.Interfaces
 {
     public interface IGameProductRepository
     {
-        public Task<List<GameProduct>> GetAllGameProductsAsync();
+        public Task<List<GameProduct>> GetAllAsync();
 
-        public Task<GameProduct> GetGameProductAsync(int id);
+        public Task<GameProduct> GetByIdAsync(int id);
 
-        public Task AddGameProductAsync(GameProduct gameProduct);
+        public Task AddAsync(GameProduct gameProduct);
 
-        Task RemoveGameProductAsync(int id);
-        public Task EditGameProductAsync(int id, GameProduct gameProduct);
+        Task RemoveAsync(int id);
+        public Task EditAsync(int id, GameProduct gameProduct);
+
+        public Task<GameProduct> GetByTitleAsync(string title);
     }
 }

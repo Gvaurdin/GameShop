@@ -1,146 +1,43 @@
-﻿@using GameShop.Exstensions
-@using GameShop.ViewModel
-@using GameShopModel.Entities
-@model GameProductsVM
-@if (User.Identity.IsAuthenticated && (User.IsInRole("user") || User.IsInRole("admin")))
-{
-    <div class="container mt-5">
-        <form asp-controller="Home" asp-action="Index" method="get">
-            Жанр:
-            <select name="selectedGenreGameProduct"
-                asp-for="FilteredGameProductVM.SelectGenreGameProduct"
-                asp-items="Model.FilteredGameProductVM.Genres">
-                <option value="">Все</option>
-            </select>
+﻿@{
+    ViewData["Title"] = "GameShopMain";
+}
 
-            Фильтрация:
-            <select name="sortGameProductState"
-                    asp-for="SortGameProductVM.SortTitleGameProduct">
-                <option value="">Все</option>
-                    <option value="TitleAsc">По алфавиту ( от А до Я)</option>
-                        <option value="TitleDesc">По алфавиту (от Я до А)</option>
-            </select>
-
-            Название игры: <input name="selectedTitleGameProduct" value="@Model.FilteredGameProductVM.SelectTitleGameProduct" type="text" />
-            <input type="submit" value="Поиск" />
-
-        </form>
-        <div class="row row-cols-4 gap-3 mt-4">
-            @foreach (var gameProduct in Model.GameProducts)
-            {
-                //var gameStatus = Model.GameStatuses[gameProduct.Id];
-                <div class="card" style="width: 18rem;">
-                    <a asp-controller="Game" asp-action="Details" asp-route-id="@gameProduct.Id">
-                        <img src="@gameProduct.PresentationImageURL" class="card-img-top" alt="@gameProduct.Title" />
-                        <div class="card-body">
-                            <h5 class="card-title">@gameProduct.Title</h5>
-                            <p class="card-text">@gameProduct.Description.Truncate(60)...</p>
-                            <p class="card-text">@gameProduct.Price₽</p>
-                        </div>
-                    </a>
-                    @if (Model.GameStatuses[gameProduct.Id].IsInLibrary)
-                    {
-                        <!-- игра уже в библиотеке, кнопку скрываем -->
-                        <p class="text-muted">Игра уже в библиотеке</p>
-                    }
-                    else if (Model.GameStatuses[gameProduct.Id].IsInCart)
-                    {
-                        <!-- игра в корзине, кнопку блокируем -->
-                        <a class="btn btn-secondary" disabled>В корзине</a>
-                    }
-                    else
-                    {
-
-                        <a asp-controller="Game" asp-action="Add" asp-route-id="@gameProduct.Id" class="btn btn-primary">Купить</a>
-
-                    }
-                </div>
-            }
+<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img class="d-block w-100" src="https://vkplay.ru/hotbox/content_files/Stories/2023/11/10/6c41c8fe999c49fca6b834ed7ab11967.jpg" alt="Grand Theft Auto V">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Grand Theft Auto V</h5>
+                <p>GTA V - Это открытый мир, экшен-приключенческая игра, в которой игрок управляет тремя персонажами: Майклом, Франклином и Тревором. Они работают вместе, 
+                    чтобы выполнить различные миссии и задания, связанные с криминальным миром Лос-Сантоса (фиктивный город, основанный на Лос-Анджелесе).</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img class="d-block w-100" src="https://videos-rockstargames-com.akamaized.net/v4/9krr33s1/art/en-us.jpg" alt="Red Dead Redemption 2">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Red Dead Redemption 2</h5>
+                <p>Действие игры происходит на территории нескольких вымышленных штатов США на рубеже XIX–XX веков. Сюжет построен вокруг приключений банды Датча Ван дер Линде.</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img class="d-block w-100" src="https://i.pinimg.com/originals/a3/b5/c8/a3b5c8e30f3f6fd789891c7f70546102.jpg" alt="Metro Exodus">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Metro Exodus</h5>
+                <p>Игра в жанре шутер от первого лица с элементами survival horror и стелс-экшен от украинского разработчика 4A Games и издателя Deep Silver.</p>
+            </div>
         </div>
     </div>
-}
-
-@{
-    const string Disabled = "disabled";
-    const string Active = "active";
-    string isDisabledPreviousPage = string.Empty;
-    if (!Model.GameProducts.HasPreviousPage)
-    {
-        isDisabledPreviousPage = Disabled;
-    }
-
-    string isDisabledNextPage = string.Empty;
-    if (!Model.GameProducts.HasNextPage)
-    {
-        isDisabledNextPage = Disabled;
-    }
-}
-<nav>
-    <ul class="pagination">
-        <li class="page-item @isDisabledPreviousPage">
-            <a asp-action="Index"
-               asp-route-page="@(Model.GameProducts.PageIndex - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
-               asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
-               asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
-               class="page-link" tabindex="-1"
-               aria-disabled="@Model.GameProducts.HasPreviousPage">Назад</a>
-        </li>
-        @for (int indexPage = 1; indexPage <= Model.GameProducts.TotalPages; indexPage++)
-        {
-            string isActive = string.Empty;
-            @if (indexPage == Model.GameProducts.PageIndex)
-            {
-                isActive = Active;
-            }
-
-            <li class="page-item @isActive">
-                <a asp-action="Index"
-                   asp-route-page="@indexPage"
-                   asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
-                   asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
-                   asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
-                   class="page-link">@indexPage</a>
-            </li>
-
-        }
-
-        <li class="page-item @isDisabledNextPage">
-            <a asp-action="Index"
-               asp-route-page="@(Model.GameProducts.PageIndex + 1)"
-               asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
-               asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
-               asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
-               class="page-link"
-               aria-disabled="@Model.GameProducts.HasNextPage">Вперед</a>
-        </li>
-    </ul>
-</nav>
-
-
-@* @if (Model.GameProducts.HasPreviousPage)
-{
-    <a asp-action="Index"
-       asp-route-page="@(Model.GameProducts.PageIndex - 1)" asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
-       asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
-       asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)" class="btn btn-outline-dark">
-        <i class="glyphicon glyphicon-chevron-left"></i>
-        Назад
-    </a>
-}
-
-
-@if (Model.GameProducts.HasNextPage)
-{
-    <a asp-action="Index"
-       asp-route-page="@(Model.GameProducts.PageIndex + 1)"
-       asp-route-sortMovieState="@(Model.SortGameProductVM.SortTitleGameProduct)"
-       asp-route-selectedMovieGenre="@(Model.FilteredGameProductVM.SelectGenreGameProduct)"
-       asp-route-selectedMovieTitle="@(Model.FilteredGameProductVM.SelectTitleGameProduct)"
-       class="btn btn-outline-dark">
-        Вперед
-        <i class="glyphicon glyphicon-chevron-right"></i>
-    </a>
-}
- *@
-
-
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>

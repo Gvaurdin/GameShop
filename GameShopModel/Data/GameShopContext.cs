@@ -1,6 +1,7 @@
 ﻿using GameShopModel.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,10 @@ namespace GameShopModel.Data
             modelBuilder.Entity<Cart>()
                 .Property(sum => sum.Sum)
                 .HasColumnType("decimal(18,2)");
+            var optionsBuilder = new DbContextOptionsBuilder<GameShopContext>();
+            optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
         }
+
         public DbSet<Genre> Genres {  get; set; }
         public DbSet<Image> Images { get; set; }
 

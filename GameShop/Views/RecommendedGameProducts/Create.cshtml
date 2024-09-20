@@ -1,4 +1,5 @@
-﻿@model GameShopModel.Entities.RecommendedGameProduct
+﻿@using GameShop.ViewModel
+@model RecommendedGameProductVM
 
 @{
     ViewData["Title"] = "Create";
@@ -8,28 +9,43 @@
 
 <h4>RecommendedGameProduct</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ExpertName" class="control-label"></label>
-                <input asp-for="ExpertName" class="form-control" />
-                <span asp-validation-for="ExpertName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ExpertSurname" class="control-label"></label>
-                <input asp-for="ExpertSurname" class="form-control" />
-                <span asp-validation-for="ExpertSurname" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="ExpertName" class="control-label"></label>
+                    <input asp-for="ExpertName" class="form-control" />
+                    <span asp-validation-for="ExpertName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ExpertSurname" class="control-label"></label>
+                    <input asp-for="ExpertSurname" class="form-control" />
+                    <span asp-validation-for="ExpertSurname" class="text-danger"></span>
+                </div>
+                <div class="form-group d-flex">
+                    <div>
+                        Название:
+                        <input asp-for="SearchGameProduct" type="text" />
+                        <input type="submit" value="Поиск" />
+                    </div>
+
+                    <select asp-for="SelectedGameProduct"
+                            asp-items="Model.GameProducts">
+                        <option value="">Вы не выбрали</option>
+                    </select>
+
+                </div>
+                @*             <div class="form-group">
                 <label asp-for="GameProductId" class="control-label"></label>
                 <select asp-for="GameProductId" class ="form-control" asp-items="ViewBag.GameProductId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+                </div> *@
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -38,5 +54,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

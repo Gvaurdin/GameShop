@@ -68,7 +68,7 @@ namespace GameShop.Controllers
 
         public async Task<IActionResult> Add(int id)
         {
-            var gameProduct = await gameProductRepository.GetGameProductAsync(id);
+            var gameProduct = await gameProductRepository.GetByIdAsync(id);
             repositoryCart.Add(gameProduct);
 
             return Redirect("~/Cart/Index");
@@ -78,7 +78,7 @@ namespace GameShop.Controllers
         {
             var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var user = await gameShopContext.Users.FirstAsync(user => user.Id == idUser);
-            var gameProduct = await gameProductRepository.GetGameProductAsync(id);
+            var gameProduct = await gameProductRepository.GetByIdAsync(id);
             await repositoryWishList.AddAsync(user, gameProduct);
             return RedirectToAction("Details", "Game",new { id = id });
         }
@@ -87,7 +87,7 @@ namespace GameShop.Controllers
         {
             var idUser = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var user = await gameShopContext.Users.FirstAsync(user => user.Id == idUser);
-            var gameProduct = await gameProductRepository.GetGameProductAsync(id);
+            var gameProduct = await gameProductRepository.GetByIdAsync(id);
             await repositoryWishList.DeleteAsync(user.Id, gameProduct.Id);
 
             return RedirectToAction("WishList", "Home");
